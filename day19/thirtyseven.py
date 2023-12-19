@@ -102,7 +102,6 @@ def main() -> int:
     for part in parts:
         if not part:
             continue
-        # for key, val in
         part = json.loads(
             part
             .replace('=', ':')
@@ -111,9 +110,7 @@ def main() -> int:
             .replace('a', '"a"')
             .replace('s', '"s"')
         )
-        # ).items():
-        # category = workflows[START][0]['category']
-        state = START  # workflows[START][0][part[category] in workflows[START][0]['condition']]
+        state = START
         while state not in (ACCEPT, REJECT):
             len_condition = len(workflows[state])
             for count, condition in enumerate(workflows[state]):
