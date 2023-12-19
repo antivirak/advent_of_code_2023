@@ -21,12 +21,18 @@ def main() -> int:
     workflows_list = splitlines(workflows)
 
     workflows = {}
+    skip = []
     for workflow in workflows_list:
         workflow_split = workflow.split('{')
         workflows[workflow_split[0]] = []
         conditions = workflow_split[1].split(',')[:-1]
         len_conditions = len(conditions)
         for count, condition in enumerate(conditions):
+            true = condition.split(':')[-1]
+            false = workflow_split[1].rstrip('}').split(',')[-1]
+            if true == false and true == ACCEPT:
+                skip.append(workflow_split[0])
+                continue
             workflows[workflow_split[0]].append({
                 'category': condition.replace('>', '<').split('<')[0],
                 'condition': range(
@@ -34,9 +40,17 @@ def main() -> int:
                 ) if '<' in condition else range(
                     int(condition.replace('>', '<').split('<')[1].split(':')[0]) + 1, 4001,
                 ),
-                True: condition.split(':')[-1],
-                False: workflow_split[1].rstrip('}').split(',')[-1] if count == len_conditions - 1 else None,
+                True: true,
+                False: false if count == len_conditions - 1 else None,
             })
+    print(skip)
+    for workflow, conditions in workflows.items():
+        for cond in conditions:
+            print(cond)
+            if cond.get(True) in skip:
+                cond[True] = ACCEPT
+            if cond.get(False) in skip:
+                cond[False] = ACCEPT
     # print(json.dumps(workflows, indent=2))
 
     # Create backward mapping
@@ -90,6 +104,8 @@ def main() -> int:
     for key, val in total.get(ACCEPT).items():
         while key != START:
             # print(list(total.get(key).keys()))
+            if not total.get(key):
+                break
             assert len(total.get(key)) == 1
             # print(key)
             key, inner_val = [(key_, val_) for key_, val_ in total.get(key).items()][0]  #  if 'condition' not in val_.keys()
