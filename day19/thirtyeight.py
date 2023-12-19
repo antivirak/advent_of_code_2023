@@ -16,7 +16,7 @@ class LenFourThousand:
 
 def main() -> int:
     """main"""
-    with open('test_input.txt', 'r') as f_in:
+    with open('input.txt', 'r') as f_in:
         workflows, _ = f_in.read().split('\n\n')
     workflows_list = splitlines(workflows)
 
@@ -37,7 +37,6 @@ def main() -> int:
                 True: condition.split(':')[-1],
                 False: workflow_split[1].rstrip('}').split(',')[-1] if count == len_conditions - 1 else None,
             })
-    import json
     # print(json.dumps(workflows, indent=2))
 
     # Create backward mapping
@@ -92,14 +91,14 @@ def main() -> int:
         while key != START:
             # print(list(total.get(key).keys()))
             assert len(total.get(key)) == 1
-            print(key)
+            # print(key)
             key, inner_val = [(key_, val_) for key_, val_ in total.get(key).items()][0]  #  if 'condition' not in val_.keys()
             for inner_key, parts in inner_val.items():
                 if inner_key == 'condition':
                     continue
-                print(inner_key, len(val.get(inner_key, [])), len(parts))
+                # print(inner_key, len(val.get(inner_key, [])), len(parts))
                 for category_key, category_val in inner_val.get('condition', {}).items():
-                    print(category_key, len(val.get(category_key, [])), min(category_val), max(category_val))
+                    # print(category_key, len(val.get(category_key, [])), min(category_val), max(category_val))
                     # if category_key in val.keys():
                     intersect = val.get(category_key, set(range(1, 4001))).intersection(category_val)
                     if intersect:
@@ -108,16 +107,14 @@ def main() -> int:
             # print(count)
         for category in 'xmas':
             # print('last loop', category, len(val.get(category, [])), len(val.get('condition', {}).get(category, [])))
-            val[category] = val.get(category, set(range(1, 4001)))  # .intersection(val.get('condition', {}).get(category, set(range(1, 4001))))
+            val[category] = val.get(category, set(range(1, 4001))).intersection(val.get('condition', {}).get(category, set(range(1, 4001))))
             val[category] = len(val[category])
             # val[category] = len(val.get(category, LenFourThousand()))
-        print({_: __ for _, __ in val.items() if _ != 'condition'}, prod(value for value in val.values() if isinstance(value, int)))
-        print()
+        # print({_: __ for _, __ in val.items() if _ != 'condition'}, prod(value for value in val.values() if isinstance(value, int)))
+        # print()
         sum_val += prod(value for value in val.values() if isinstance(value, int))
 
-    return sum_val  # should be 167_409_079_868_000 167409079868000
-    #                                               85015023140000
-    #                                               256000000000000 - max (4000 ** 4)
+    return sum_val  # 79931050367370 incorrect
 
 
 if __name__ == '__main__':
