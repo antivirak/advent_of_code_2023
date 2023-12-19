@@ -53,7 +53,7 @@ def main() -> int:
             for condition in conditions:
                 if condition.get(True) == outer_workflow:
                     total[outer_workflow][workflow][condition.get('category')].update(condition.get('condition'))
-                if condition.get(False) is None:
+                elif condition.get(False) is None:
                     to_update = set(range(1, 4001)) - set(condition.get('condition'))
                     # if not total[outer_workflow][workflow]['condition'].get(condition.get('category')):
                     total[outer_workflow][workflow]['condition'][condition.get('category')] = to_update
@@ -100,7 +100,10 @@ def main() -> int:
                 print(inner_key, len(val.get(inner_key, [])), len(parts))
                 for category_key, category_val in inner_val.get('condition', {}).items():
                     print(category_key, len(val.get(category_key, [])), min(category_val), max(category_val))
-                    val[category_key] = val.get(category_key, set(range(1, 4001))).intersection(category_val)  # .intersection(val.get(inner_key, set(range(1, 4001))))
+                    # if category_key in val.keys():
+                    intersect = val.get(category_key, set(range(1, 4001))).intersection(category_val)
+                    if intersect:
+                        val[category_key] = intersect  # .intersection(val.get(inner_key, set(range(1, 4001))))
                 val[inner_key] = val.get(inner_key, parts).intersection(parts)  # .intersection(val.get('condition', {}).get(inner_key, set(range(1, 4001))))
             # print(count)
         for category in 'xmas':
