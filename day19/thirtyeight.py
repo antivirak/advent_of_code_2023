@@ -1,14 +1,17 @@
 from math import prod
 from typing import List
 
+from thirtyseven import splitlines
+
 START = 'in'
 ACCEPT = 'A'
 REJECT = 'R'
 
 
-def splitlines(workflows: str) -> List[str]:
-    """Split and strip"""
-    return [workflow.strip() for workflow in workflows.split('\n')]
+class LenFourThousand:
+    """Hacky class to get 4000 as len of arbitrary object"""
+    def __len__(self):
+        return 4000
 
 
 def main() -> int:
@@ -42,12 +45,12 @@ def main() -> int:
     for outer_workflow in outer_workflow_keys:
         total[outer_workflow] = {}
         for workflow, conditions in workflows.items():
-            total[outer_workflow][workflow] = {category: 0 for category in 'xmas'}
+            total[outer_workflow][workflow] = {category: set() for category in 'xmas'}
             for condition in conditions:
                 if condition.get(True) == outer_workflow:
-                    total[outer_workflow][workflow][condition.get('category')] += condition.get('condition')
+                    total[outer_workflow][workflow][condition.get('category')].update(range(1, condition.get('condition')))
                 if condition.get(False) == outer_workflow:
-                    total[outer_workflow][workflow][condition.get('category')] += 4000 - condition.get('condition')
+                    total[outer_workflow][workflow][condition.get('category')].update(range(condition.get('condition'), 4001))
             # if not any(total[outer_workflow][workflow].values()):
             #     total[outer_workflow].pop(workflow)
             to_pop = [key for key, val in total[outer_workflow][workflow].items() if not val]
@@ -63,14 +66,15 @@ def main() -> int:
     # Trying backwards
     sum_val = 0
     for key, val in total.get(ACCEPT).items():
+        print(key)
         while key != START:
             # assert len(total.get(inner_key)) == 1
             key, inner_val = list(total.get(key).items())[0]
             for inner_key, parts in inner_val.items():
-                val[inner_key] = min(val.get(inner_key, 4000), parts)
+                val[inner_key] = val.get(inner_key, parts).intersection(parts)
             # print(count)
         for category in 'xmas':
-            val[category] = val.get(category, 4000)
+            val[category] = len(val.get(category, LenFourThousand()))
         print(val)
         sum_val += prod(val.values())
         # print(val, total.get(key))
@@ -86,7 +90,7 @@ def main() -> int:
     # key = workflows[START][0][False]
 
     return sum_val  # should be 167_409_079_868_000 167409079868000
-    #                                               304318042864000
+    #                                               160436912400000
     #                                               256000000000000 - max (4000 ** 4)
 
 
