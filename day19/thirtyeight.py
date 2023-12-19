@@ -41,7 +41,7 @@ def main() -> int:
     # Create backward mapping
     total = {}
     outer_workflow_keys = list(workflows.keys())
-    outer_workflow_keys.append(REJECT)
+    outer_workflow_keys.append(ACCEPT)
     for outer_workflow in outer_workflow_keys:
         total[outer_workflow] = {}
         for workflow, conditions in workflows.items():
@@ -65,7 +65,7 @@ def main() -> int:
 
     # Trying backwards
     sum_val = 0
-    for key, val in total.get(REJECT).items():
+    for key, val in total.get(ACCEPT).items():
         print(key)
         while key != START:
             # assert len(total.get(inner_key)) == 1
@@ -89,9 +89,9 @@ def main() -> int:
     #     all_posib -= 
     # key = workflows[START][0][False]
 
-    return 256000000000000 - sum_val  # should be 167_409_079_868_000 167409079868000
-    #                                                                 99196496400000
-    #                                                                 256000000000000 - max (4000 ** 4)
+    return sum_val  # should be 167_409_079_868_000 167409079868000
+    #                                               160436912400000
+    #                                               256000000000000 - max (4000 ** 4)
 
 
 if __name__ == '__main__':
