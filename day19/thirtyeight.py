@@ -32,7 +32,7 @@ def main() -> int:
                 'condition': range(
                     1, int(condition.replace('>', '<').split('<')[1].split(':')[0])
                 ) if '<' in condition else range(
-                    int(condition.replace('>', '<').split('<')[1].split(':')[0]), 4001,
+                    int(condition.replace('>', '<').split('<')[1].split(':')[0]) + 1, 4001,
                 ),
                 True: condition.split(':')[-1],
                 False: workflow_split[1].rstrip('}').split(',')[-1] if count == len_conditions - 1 else None,
@@ -53,10 +53,15 @@ def main() -> int:
             for condition in conditions:
                 if condition.get(True) == outer_workflow:
                     total[outer_workflow][workflow][condition.get('category')].update(condition.get('condition'))
-                    if condition.get(False) is None:
-                        total[outer_workflow][workflow]['condition'][condition.get('category')] = set(range(1, 4001)) - set(condition.get('condition'))
+                if condition.get(False) is None:
+                    to_update = set(range(1, 4001)) - set(condition.get('condition'))
+                    # if not total[outer_workflow][workflow]['condition'].get(condition.get('category')):
+                    total[outer_workflow][workflow]['condition'][condition.get('category')] = to_update
+                    # else:
+                    #     total[outer_workflow][workflow]['condition'][condition.get('category')].update(to_update)
                 if condition.get(False) == outer_workflow:
-                    total[outer_workflow][workflow][condition.get('category')].update(set(range(1, 4001)) - set(condition.get('condition')))  # set(range(1, 4001)) - set(condition.get('condition'))
+                    to_update = set(range(1, 4001)) - set(condition.get('condition'))
+                    total[outer_workflow][workflow][condition.get('category')].update(to_update)  # set(range(1, 4001)) - set(condition.get('condition'))
                 # for print:
                 # total[outer_workflow][workflow][condition.get('category')] = (min(total[outer_workflow][workflow][condition.get('category')] or [0]), max(total[outer_workflow][workflow][condition.get('category')] or [0]))
                 # total[outer_workflow][workflow]['condition'][condition.get('category')] = (min(total[outer_workflow][workflow]['condition'].get(condition.get('category')) or [0]), max(total[outer_workflow][workflow]['condition'].get(condition.get('category')) or [0]))
@@ -68,9 +73,12 @@ def main() -> int:
             #     total[outer_workflow].pop(workflow)
             if not total[outer_workflow][workflow]['condition']:
                 total[outer_workflow][workflow].pop('condition')
+            total_workflow_key = total[outer_workflow][workflow].keys()
             to_pop = [key for key, val in total[outer_workflow][workflow].items() if not val]
             for key in to_pop:
                 total[outer_workflow][workflow].pop(key)
+            if 'condition' in total_workflow_key and len(total_workflow_key) == 1:
+                total[outer_workflow][workflow].pop('condition')
         to_pop = [key for key, val in total[outer_workflow].items() if not val]
         for key in to_pop:
             total[outer_workflow].pop(key)
@@ -83,25 +91,29 @@ def main() -> int:
     for key, val in total.get(ACCEPT).items():
         while key != START:
             # print(list(total.get(key).keys()))
-            #assert len(total.get(key)) == 1
-            # print(key)
-            key, inner_val = [(key_, val_) for key_, val_ in total.get(key).items() if 'condition' not in val_.keys()][0]
+            assert len(total.get(key)) == 1
+            print(key)
+            key, inner_val = [(key_, val_) for key_, val_ in total.get(key).items()][0]  #  if 'condition' not in val_.keys()
             for inner_key, parts in inner_val.items():
                 if inner_key == 'condition':
                     continue
-                val[inner_key] = val.get(inner_key, parts).intersection(parts)
+                print(inner_key, len(val.get(inner_key, [])), len(parts))
+                for category_key, category_val in inner_val.get('condition', {}).items():
+                    print(category_key, len(val.get(category_key, [])), min(category_val), max(category_val))
+                    val[category_key] = val.get(category_key, set(range(1, 4001))).intersection(category_val)  # .intersection(val.get(inner_key, set(range(1, 4001))))
+                val[inner_key] = val.get(inner_key, parts).intersection(parts)  # .intersection(val.get('condition', {}).get(inner_key, set(range(1, 4001))))
             # print(count)
         for category in 'xmas':
-            val[category] = val.get(category, set()).intersection(val.get('condition', {}).get(category, set(range(1, 4001))))
-            # val['condition'][category]
+            # print('last loop', category, len(val.get(category, [])), len(val.get('condition', {}).get(category, [])))
+            val[category] = val.get(category, set(range(1, 4001)))  # .intersection(val.get('condition', {}).get(category, set(range(1, 4001))))
             val[category] = len(val[category])
-        print(val, prod(val.values()))
+            # val[category] = len(val.get(category, LenFourThousand()))
+        print({_: __ for _, __ in val.items() if _ != 'condition'}, prod(value for value in val.values() if isinstance(value, int)))
         print()
-        sum_val += prod(val.values())
-        # print(val, total.get(key))
+        sum_val += prod(value for value in val.values() if isinstance(value, int))
 
     return sum_val  # should be 167_409_079_868_000 167409079868000
-    #                                               105389645400000
+    #                                               85015023140000
     #                                               256000000000000 - max (4000 ** 4)
 
 
