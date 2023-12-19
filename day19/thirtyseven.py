@@ -88,10 +88,10 @@ def main() -> int:
             workflows[workflow_split[0]].append({
                 'category': condition.replace('>', '<').split('<')[0],
                 'condition': range(
-                    int(condition.replace('>', '<').split('<')[1].split(':')[0])
+                    1, int(condition.replace('>', '<').split('<')[1].split(':')[0])
                 ) if '<' in condition else range(
-                    int(condition.replace('>', '<').split('<')[1].split(':')[0]), 4000,
-                    # 4000 is spoiler from part2, but could be any arbitrary large number
+                    int(condition.replace('>', '<').split('<')[1].split(':')[0]), 4001,
+                    # 1-4000 is spoiler from part2, but could be any arbitrary large number
                 ),
                 True: condition.split(':')[-1],
                 False: workflow_split[1].rstrip('}').split(',')[-1],
