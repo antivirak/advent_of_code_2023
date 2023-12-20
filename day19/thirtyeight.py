@@ -21,7 +21,7 @@ def main() -> int:
     workflows_list = splitlines(workflows)
 
     workflows = {}
-    skip = []
+    skip = {}
     for workflow in workflows_list:
         workflow_split = workflow.split('{')
         workflows[workflow_split[0]] = []
@@ -30,9 +30,10 @@ def main() -> int:
         for count, condition in enumerate(conditions):
             true = condition.split(':')[-1]
             false = workflow_split[1].rstrip('}').split(',')[-1]
-            if true == false and true == ACCEPT:
-                skip.append(workflow_split[0])
-                continue
+            if true == false:
+                skip[workflow_split[0]] = true
+                if true == ACCEPT:
+                    continue
             workflows[workflow_split[0]].append({
                 'category': condition.replace('>', '<').split('<')[0],
                 'condition': range(
@@ -43,14 +44,15 @@ def main() -> int:
                 True: true,
                 False: false if count == len_conditions - 1 else None,
             })
-    print(skip)
+    if any(val in skip for val in skip.values()):
+        raise
     for workflow, conditions in workflows.items():
         for cond in conditions:
             print(cond)
             if cond.get(True) in skip:
-                cond[True] = ACCEPT
+                cond[True] = skip[cond.get(True)]
             if cond.get(False) in skip:
-                cond[False] = ACCEPT
+                cond[False] = skip[cond.get(False)]
     # print(json.dumps(workflows, indent=2))
 
     # Create backward mapping
