@@ -1,5 +1,4 @@
 from math import prod
-from typing import List
 
 from thirtyseven import splitlines
 
@@ -133,6 +132,8 @@ def main() -> int:
         sum_val += prod(value for value in val.values() if isinstance(value, int))
 
     return sum_val  # 79931050367370 incorrect
+                    # 10538667682659138 incorrect
+                    # 131796824371749 should be ok
 
 
 if __name__ == '__main__':
