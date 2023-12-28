@@ -3,15 +3,12 @@ import numpy as np
 # tohle nebude vubec easy, kazdy casovy okamzik se meni pozice a
 # nikdy nemusi byt v jedne rade, protoze se s nimi proste musim po ceste srazit
 # a ja mam taky jen pocatecni pos a vel.
-# Mohla by to byt nejakym zpusobem optimalizacni uloha.
-# zacnem na nahodne pozici a budem upravovat.
-# Co bude ale ucelova funkce?
 # pocatecni norma rychlosti by mohla bejt neco jako prumerna vzdalenost mezi kroupami
 
 
 def main() -> int:
     """main"""
-    with open('test_input.txt', 'r') as f_in:
+    with open('input.txt', 'r') as f_in:
         vectors = f_in.readlines()
 
     pos = []
@@ -32,27 +29,49 @@ def main() -> int:
     # So you only need 4 hailstones to determine the answer.
 
     # make all positions and velocities relative to the first hailstone
-    real_pos_0 = pos[0]
-    real_vel_0 = vel[0]
+    # vel = [x for _, x in sorted(zip(pos, vel))]
+    # pos.sort()
+    pos_backup = pos.copy()
+    vel_backup = vel.copy()
     print('real_vel0: ', vel[0])
-    pos = np.array(pos) - pos[0]
-    vel = np.array(vel) - vel[0]
-    # define the plane using the second hailstone. Use the [0, 0, 0] and 2 points in 2nd hailstone's trajectory
-    points = [pos[1] + vel[1] * step for step in range(2)]
-    # ax + by + cz + d = 0
-    # d = 0 because the plane goes through the origin
-    # print(points)
-    n = np.cross(*points)
-    # print(n)
-    # find when and where hailstones 3 & 4 intersect the plane
-    # parametric equation of a line for hailstone 3 trajectory
-    # pos3 + vel3 * t
-    # pos4 + vel4 * t
-    t3 = np.dot(n, pos[2]) / np.dot(n, vel[2])
-    t4 = np.dot(n, pos[3]) / np.dot(n, vel[3])
+    count = 0
+    while True:
+        # zkousim iterovat pres kroupy, ale v principu by to nemelo byt nutne.
+        # vysledek nenajit, ale nezkousim vsechny kombinace
+        real_pos_0 = pos_backup[count]
+        real_vel_0 = vel_backup[count]
+        pos = np.array(pos_backup[0+count:]) - real_pos_0
+        vel = np.array(vel_backup[0+count:]) - real_vel_0
+        # define the plane using the second hailstone. Use the [0, 0, 0] and 2 points in 2nd hailstone's trajectory
+        points = [pos[1] + vel[1] * step for step in range(2)]
+        # ax + by + cz + d = 0
+        # d = 0 because the plane goes through the origin
+        # print(points)
+        n = np.cross(*points)
+        # print(n)
+        # find when and where hailstones 3 & 4 intersect the plane
+        # parametric equation of a line for hailstone 3 trajectory
+        # pos3 + vel3 * t
+        # pos4 + vel4 * t
+        t = []
+        for current_pos, current_vel in zip(pos[2:], vel[2:]):
+            nom = np.dot(n, current_pos)
+            denom = np.dot(n, current_vel)
+            # print('fraction: ', nom, denom)
+            t = nom / denom
+            print('collision time: ', t)
+            if float(int(t)) == t:
+                t.append(t)
+                if len(t) == 2:
+                    break
+        else:
+            count += 1
+            continue
+        t3, t4 = t
+        print('collision times: ', t3, t4)
+        break
     pos = pos + real_pos_0
     vel = vel + real_vel_0
-    print('collision times: ', t3, t4)
     pos3_x = pos[2][0] - vel[2][0] * t3
     pos3_y = pos[2][1] - vel[2][1] * t3
     pos3_z = pos[2][2] - vel[2][2] * t3
