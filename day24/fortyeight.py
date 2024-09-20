@@ -11,7 +11,7 @@ import numpy as np
 
 def main() -> int:
     """main"""
-    with open('test_input.txt', 'r') as f_in:
+    with open('input.txt', 'r') as f_in:
         vectors = f_in.readlines()
 
     pos = []
@@ -32,26 +32,22 @@ def main() -> int:
     # So you only need 4 hailstones to determine the answer.
 
     # make all positions and velocities relative to the first hailstone
-    real_pos_0 = pos[0]
-    real_vel_0 = vel[0]
-    print('real_vel0: ', vel[0])
-    pos = np.array(pos) - pos[0]
+    pos = np.array(pos)
     vel = np.array(vel) - vel[0]
     # define the plane using the second hailstone. Use the [0, 0, 0] and 2 points in 2nd hailstone's trajectory
     points = [pos[1] + vel[1] * step for step in range(2)]
     # ax + by + cz + d = 0
-    # d = 0 because the plane goes through the origin
     # print(points)
-    n = np.cross(*points)
+    n = np.cross(points[0] - pos[0], points[1] - pos[0])  # normal vector of the plane
+    d = -np.dot(n, pos[1])  # d = -ax - by - cz
+    print(d)
     # print(n)
     # find when and where hailstones 3 & 4 intersect the plane
     # parametric equation of a line for hailstone 3 trajectory
     # pos3 + vel3 * t
     # pos4 + vel4 * t
-    t3 = np.dot(n, pos[2]) / np.dot(n, vel[2])
-    t4 = np.dot(n, pos[3]) / np.dot(n, vel[3])
-    pos = pos + real_pos_0
-    vel = vel + real_vel_0
+    t3 = (np.dot(n, pos[2]) + d) / (np.dot(n, vel[2]))
+    t4 = (np.dot(n, pos[3]) + d) / (np.dot(n, vel[3]))
     print('collision times: ', t3, t4)
     pos3_x = pos[2][0] - vel[2][0] * t3
     pos3_y = pos[2][1] - vel[2][1] * t3
@@ -62,7 +58,7 @@ def main() -> int:
     pos4_x = pos[3][0] - vel[3][0] * t4
     pos4_y = pos[3][1] - vel[3][1] * t4
     pos4_z = pos[3][2] - vel[3][2] * t4
-    print('pos4: ', pos4_x + real_pos_0[0], pos4_y + real_pos_0[1], pos4_z + real_pos_0[2])
+    print('pos4: ', pos4_x, pos4_y, pos4_z)
     vel_x = (pos4_x - pos3_x) / (t4 - t3)
     vel_y = (pos4_y - pos3_y) / (t4 - t3)
     vel_z = (pos4_z - pos3_z) / (t4 - t3)
@@ -71,7 +67,6 @@ def main() -> int:
     pos_y = pos3_y - vel_y * t3
     pos_z = pos3_z - vel_z * t3
     print(pos_x, pos_y, pos_z)
-    print(pos_x + real_pos_0[0], pos_y + real_pos_0[1], pos_z + real_pos_0[2])  # 24, 13, 10
 
     t = []
     for current_pos, current_vel in zip(pos, vel):
