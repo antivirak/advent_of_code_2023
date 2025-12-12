@@ -1,3 +1,7 @@
+"""
+24329
+"""
+
 from typing import Self
 
 import pandas as pd

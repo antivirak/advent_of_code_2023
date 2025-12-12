@@ -1,3 +1,7 @@
+"""
+38605
+"""
+
 from itertools import product
 
 import numpy as np

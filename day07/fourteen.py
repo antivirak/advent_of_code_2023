@@ -1,3 +1,7 @@
+"""
+43338
+"""
+
 from thirteen_discriminant import HandType
 
 
